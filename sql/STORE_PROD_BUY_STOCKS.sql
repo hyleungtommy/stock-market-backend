@@ -35,6 +35,12 @@ BEGIN
         SET funds = funds - v_sell_price
         WHERE user_id = p_buyer_user_id;
 
+        --insert into transaction log
+        INSERT INTO transaction_logs  (user_id, stock_id, sell_price, sell_amt)
+        SELECT user_id, stock_id, sell_price, sell_amt
+        FROM transactions
+        WHERE id = p_transaction_id;
+
         --remove the transaction
         DELETE FROM transactions
         WHERE id = p_transaction_id;

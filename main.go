@@ -6,11 +6,23 @@ import (
 
 	"gohttp/api"
 	"gohttp/repo"
+	"gohttp/tasks"
+	"time"
 
 	"github.com/gorilla/mux"
 )
 
 func main() {
+
+	go startServer()
+
+	go startTasks()
+
+	select {}
+
+}
+
+func startServer() {
 	if err := repo.SetupRepo(); err != nil {
 		panic(err)
 	}
@@ -30,10 +42,22 @@ func main() {
 	router.HandleFunc("/trans/buy", api.BuyStock).Methods("POST")
 	router.HandleFunc("/trans/sell", api.SellStock).Methods("POST")
 	router.HandleFunc("/trans/buyInit", api.BuyInitStock).Methods("POST")
+	router.HandleFunc("/trans/list", api.ListTransactions).Methods("POST")
 
 	fmt.Println("Server listening on :8080")
 	http.ListenAndServe(":8080", router)
+}
 
+func startTasks() {
+	ticker := time.NewTicker(3600 * time.Second) // Schedule tasks every hour
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			tasks.UpdateStockPrice()
+		}
+	}
 }
 
 /*
