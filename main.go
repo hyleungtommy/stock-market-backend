@@ -30,6 +30,15 @@ func startServer() {
 	defer repo.CloseRepo()
 	router := mux.NewRouter()
 
+	//for handling preflight CORS
+	router.Methods("OPTIONS").HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			return
+		})
+
 	router.HandleFunc("/stocks", api.ListStocks).Methods("GET")
 	router.HandleFunc("/stocks/{id}", api.GetStock).Methods("GET")
 	router.HandleFunc("/stocks/{id}/remain", api.UpdateRemainStock).Methods("PUT")
